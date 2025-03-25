@@ -181,6 +181,9 @@ If you would like to get in touch, feel free to reach out to [sschmi46@jhu.edu](
       title={AgentRxiv: Towards Collaborative Autonomous Research}, 
       author={Samuel Schmidgall and Michael Moor},
       year={2025},
-      url={https://AgentRxiv.github.io/},
+      eprint={2503.18102},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2503.18102}, 
 }
 ```
