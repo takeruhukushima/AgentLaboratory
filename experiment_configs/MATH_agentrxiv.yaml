@@ -1,5 +1,5 @@
 # If you want to have user input or be a human-in-the-loop
-copilot_mode: False
+copilot-mode: False
 
 # Here is the research prompt. If num-papers-to-write > 1, you can treat this as a "research direction" otherwise it can be *very* specific and can be treated as a full research idea
 research-topic: "Your goal is to design reasoning and prompt engineering techniques to maximize accuracy on the entire 500 test questions of MATH500 benchmark. Your idea should be very novel."
