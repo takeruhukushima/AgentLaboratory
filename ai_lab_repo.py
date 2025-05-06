@@ -46,7 +46,7 @@ class SemanticScholarSearch:
     def search(self, query: str, n: int):
         import requests
         headers = {"x-api-key": self.key}
-        params = {"query": query, "limit": n, "fields": "title,authors,year,abstract"}
+        params = {"query": query, "limit": n, "fields": "title,authors,year,abstract,venue,journal,citationCount,fieldsOfStudy,openAccessPdf,url"}
         resp = requests.get(self.BASE_URL, headers=headers, params=params)
         resp.raise_for_status()
         return resp.json().get("data", [])
@@ -71,7 +71,6 @@ class LaboratoryWorkflow:
     def literature_review(self):
         print(f"[ステップ1] 文献レビュー: '{self.topic}' を arXiv と Semantic Scholar から検索中…")
         bullets = []
-        # arXiv: include title and abstract
         for i, p in enumerate(self.searcher_arxiv.search(self.topic, self.n_papers), 1):
             prompt = textwrap.dedent(
                 f"""
@@ -81,7 +80,6 @@ class LaboratoryWorkflow:
                 """
             )
             bullets.append(f"- **(arXiv) {p.title}** — {query_model(prompt)}")
-        # Semantic Scholar
         if self.searcher_s2:
             for i, p in enumerate(self.searcher_s2.search(self.topic, self.n_papers), 1):
                 title = p.get("title")
@@ -117,7 +115,6 @@ class LaboratoryWorkflow:
 
     def additional_literature_review(self):
         print("[ステップ3] 追加文献レビュー: 実験計画に基づく結果・考察の文献レビュー…")
-        # 実験計画から検索キーワードを生成
         prompt_query = textwrap.dedent(
             f"""
             以下の実験計画に基づき、新たに必要な論文を調べるための検索クエリを3単語（スペース区切り）で生成してください。
@@ -127,9 +124,7 @@ class LaboratoryWorkflow:
         )
         self.additional_query = query_model(prompt_query)
         print(f"追加検索クエリ: {self.additional_query}")
-        print(f"生成された追加クエリ: {self.additional_query}")
         bullets = []
-        # arXiv検索
         for p in self.searcher_arxiv.search(self.additional_query, self.n_papers):
             prompt = textwrap.dedent(
                 f"""
@@ -139,7 +134,6 @@ class LaboratoryWorkflow:
                 """
             )
             bullets.append(f"- **(arXiv) {p.title}** — {query_model(prompt)}")
-        # Semantic Scholar検索
         if self.searcher_s2:
             for p in self.searcher_s2.search(self.additional_query, self.n_papers):
                 title = p.get("title")
@@ -158,27 +152,35 @@ class LaboratoryWorkflow:
         print(f"追加文献レビュー結果を保存 → {self.lab_dir / 'additional_review.md'}")
 
     def data_preparation(self):
-        print("[ステップ4] データ準備: 追加文献レビュー結果を実験結果として使用します…")
-        self.exp_results = self.additional_summary
+        print("[ステップ4] データ準備: 追加文献レビュー結果を実験結果として生成…")
+        prompt_results = textwrap.dedent(
+            f"""
+            {self.additional_summary}を元に
+            {self.plan_text}に即した実験結果をMECEにまとめてください。
+            """
+        )
+        self.exp_results = query_model(prompt_results)
+        print(f"生成された実験結果: {self.exp_results}")
 
     def generate_discussion_and_conclusion(self):
         prompt_disc = textwrap.dedent(
             f"""
-            以下の実験結果を踏まえて、考察を日本語で2文以内で生成してください。
+            あなたはNovel賞を取るような科学者の一人です。平易な言葉に甘えず、
+            以下の実験結果を踏まえて、考察を日本語でMECEに生成してください。
             実験結果: {self.exp_results}
             """
         )
         self.discussion = query_model(prompt_disc)
         prompt_conc = textwrap.dedent(
             f"""
-            以下の考察を踏まえて、結論を日本語で2文以内で生成してください。
+            以下の考察を踏まえて、結論を日本語でMECEに生成してください。
             考察: {self.discussion}
             """
         )
         self.conclusion = query_model(prompt_conc)
 
     def report_writing(self):
-        print("[ステップ6] レポート作成: 論文形式のレポートをまとめ中…")
+        print("[ステップ5] レポート作成: 論文形式のレポートをまとめ中…")
         self.data_preparation()
         self.generate_discussion_and_conclusion()
         report = textwrap.dedent(f"""
