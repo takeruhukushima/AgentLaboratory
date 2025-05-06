@@ -84,6 +84,7 @@ sudo apt install pdflatex
 5. **Now run Agent Laboratory!**
 
 `python ai_lab_repo.py --yaml-location "experiment_configs/MATH_agentlab.yaml"`
+"python ai_lab_repo.py --topic "spinodal decomposition pore size distribution with heating temperature" --n 10"
 
 
 ### Co-Pilot mode

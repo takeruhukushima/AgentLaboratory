@@ -117,7 +117,7 @@ class LaboratoryWorkflow:
         print("[ステップ3] 追加文献レビュー: 実験計画に基づく結果・考察の文献レビュー…")
         prompt_query = textwrap.dedent(
             f"""
-            以下の実験計画に基づき、新たに必要な論文を調べるための検索クエリを3単語（スペース区切り）で生成してください。
+            以下の実験計画に基づき、新たに必要な論文を調べるための検索クエリを英語で3単語（スペース区切り）で生成してください。
             実験計画:
             {self.plan_text}
             """
@@ -135,17 +135,20 @@ class LaboratoryWorkflow:
             )
             bullets.append(f"- **(arXiv) {p.title}** — {query_model(prompt)}")
         if self.searcher_s2:
-            for p in self.searcher_s2.search(self.additional_query, self.n_papers):
-                title = p.get("title")
-                abstract = p.get("abstract", "")
-                prompt = textwrap.dedent(
-                    f"""
-                    以下の論文のタイトルと要旨（abstract）に基づき、結果および考察を中心に日本語で3文以内に要約してください。
-                    論文タイトル: {title}
-                    要旨: {abstract}
-                    """
-                )
-                bullets.append(f"- **(S2) {title}** — {query_model(prompt)}")
+            try:
+                for p in self.searcher_s2.search(self.additional_query, self.n_papers):
+                    title = p.get("title")
+                    abstract = p.get("abstract", "")
+                    prompt = textwrap.dedent(
+                        f"""
+                        以下の論文のタイトルと要旨（abstract）に基づき、結果および考察を中心に日本語で3文以内に要約してください。
+                        論文タイトル: {title}
+                        要旨: {abstract}
+                        """
+                    )
+                    bullets.append(f"- **(S2) {title}** — {query_model(prompt)}")
+            except Exception as e:
+                print(f"Semantic Scholar API error: {e}")
         md = "### 追加文献レビュー: 結果・考察\n" + "\n".join(bullets)
         (self.lab_dir / "additional_review.md").write_text(md)
         self.additional_summary = md
@@ -155,8 +158,10 @@ class LaboratoryWorkflow:
         print("[ステップ4] データ準備: 追加文献レビュー結果を実験結果として生成…")
         prompt_results = textwrap.dedent(
             f"""
-            {self.additional_summary}を元に
+            
+            {self.lit_summary},{self.additional_summary}を元に
             {self.plan_text}に即した実験結果をMECEにまとめてください。
+            期待される結果ではなく、実際の論文の結果をまとめてください。
             """
         )
         self.exp_results = query_model(prompt_results)
@@ -224,7 +229,7 @@ class LaboratoryWorkflow:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--topic", required=False, help="研究トピック")
-    ap.add_argument("--n", type=int, default=5, help="論文数(arXiv/S2)")
+    ap.add_argument("--n", type=int, default=3, help="論文数(arXiv/S2)")
     args = ap.parse_args()
     topic = args.topic or input("研究トピックを入力してください: ")
     wf = LaboratoryWorkflow(topic=topic, n_papers=args.n)

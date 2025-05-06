@@ -1,0 +1,3 @@
+### 追加文献レビュー: 結果・考察
+- **(S2) Influence of Microwave Irradiation on Water-Vapor Desorption from Zeolites** — マイクロ波照射はゼオライトからの水蒸気脱着を促進し、特に難脱着性や大容量吸着性を持つゼオライトで温風加熱よりも顕著な過剰脱着効果が見られた。この効果は温風加熱よりも高温で脱着させたのと同等であり、マイクロ波と温風の併用により熱源温度の低減が可能となる。脱着速度は細孔径や吸着量に依存し、空気流速に対して脱着率が最小となる点が明らかになった。
+- **(S2) Effect of Pillar Density on Micropore Volume and Thermal Durability of Alumina Pillared Fluorine Micas.** — フッ素雲母の層電荷と導入するAlイオン種を制御することで、架橋フッ素雲母のピラー密度を調整できることが示された。ピラー密度が高いほど耐熱性が向上し、高温でも高い比表面積を維持する。細孔容積はピラー密度と加熱処理温度に依存し、ピラー密度に応じて細孔径分布が変化することが明らかになった。
